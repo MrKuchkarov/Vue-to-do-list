@@ -23,7 +23,7 @@
       />
     </my-dialog>
     <post-list
-        :posts="posts"
+        :posts="sortedPosts"
         @remove="removePost"
         v-if="!isPostsLoading"
     />
@@ -83,12 +83,13 @@ import axios from "axios";
     mounted() {
       this.fetchPosts();
     },
-    watch: {
-      selectedSort(newValue) {
-        this.posts.sort((postOne, postTwo) => {
-          return postOne[newValue]?.localeCompare(postTwo[newValue]);
-        })
+    computed: {
+      sortedPosts() {
+        return [...this.posts].sort((postOne, postTwo) => postOne[this.selectedSort]?.localeCompare(postTwo[this.selectedSort]));
       }
+    },
+    watch: {
+
     }
   }
 </script>
