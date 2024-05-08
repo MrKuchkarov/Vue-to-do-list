@@ -53,7 +53,7 @@ import axios from "axios";
         selectedSort: '',
         sortOptions: [
           {value: 'title', name: 'По названию'},
-          {value: 'ищвн', name: 'По содержимому'},
+          {value: 'body', name: 'По содержимому'},
         ]
       }
     },
@@ -82,6 +82,13 @@ import axios from "axios";
     },
     mounted() {
       this.fetchPosts();
+    },
+    watch: {
+      selectedSort(newValue) {
+        this.posts.sort((postOne, postTwo) => {
+          return postOne[newValue]?.localeCompare(postTwo[newValue]);
+        })
+      }
     }
   }
 </script>
