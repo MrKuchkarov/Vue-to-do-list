@@ -15,8 +15,7 @@
           placeholder="Описание"
       >
       <my-button
-          class="btn"
-          style="align-self: flex-end"
+          style="align-self: flex-end; margin-top: 15px;"
           @click="createPost"
       >
         Создать
@@ -26,10 +25,9 @@
 </template>
 
 <script>
-import MyButton from "@/components/UI/MyButton.vue";
+
 
 export default {
-  components: {MyButton},
   data() {
     return {
       post: {
