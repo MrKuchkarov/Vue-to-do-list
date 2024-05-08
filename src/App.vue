@@ -1,32 +1,87 @@
 <template>
   <div class="app">
-      <form>
-        <h3>Название поста</h3>
-        <input class="input" type="text" placeholder="Название"></input>
-        <input class="input" type="text" placeholder="Описание"></input>
-        <button class="btn">Создать</button>
-      </form>
-   <div class="post" v-for="post in posts">
-     <div><strong>Название:</strong>{{ post.title }}</div>
-     <div><strong>Описание:</strong>{{ post.body }}</div>
-   </div>
+    <h1>Страница с постами</h1>
+    <div class="app__bnts"
+    >
+      <my-button
+          @click="showDialog"
+      >
+        Создать пользователя
+      </my-button>
+      <my-select
+          v-model="selectedSort"
+          :options="sortOptions"
+      >
+
+      </my-select>
+    </div>
+    <my-dialog
+        v-model:show="dialogVisible"
+    >
+      <post-form
+          @create="createPost"
+      />
+    </my-dialog>
+    <post-list
+        :posts="posts"
+        @remove="removePost"
+        v-if="!isPostsLoading"
+    />
+    <div
+        v-else
+    >
+      Идёт загрузка постов...
+    </div>
   </div>
 </template>
 
 <script>
+import PostForm from "@/components/PostForm.vue";
+import PostList from "@/components/PostList.vue";
+import axios from "axios";
+
   export default {
+    components: {
+      PostForm,
+      PostList
+    },
     data() {
       return {
-        posts: [
-          {id: 1, title: 'JavaScript', body: 'Описание поста'},
-          {id: 2, title: 'PHP', body: 'Описание поста'},
-          {id: 3, title: 'Python', body: 'Описание поста'},
-          {id: 4, title: 'Vue', body: 'Описание поста'},
+        posts: [],
+        dialogVisible: false,
+        isPostsLoading: false,
+        selectedSort: '',
+        sortOptions: [
+          {value: 'title', name: 'По названию'},
+          {value: 'ищвн', name: 'По содержимому'},
         ]
       }
     },
     methods: {
-
+      createPost(post) {
+        this.posts.push(post);
+        this.dialogVisible = false;
+      },
+      removePost(post) {
+        this.posts = this.posts.filter(p => p.id !== post.id)
+      },
+      showDialog() {
+        this.dialogVisible = true;
+      },
+      async fetchPosts() {
+        try {
+          this.isPostsLoading = true;
+          const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
+          this.posts = response.data;
+        } catch(e) {
+          alert('Ой, ошибка')
+        } finally {
+          this.isPostsLoading = false;
+        }
+      }
+    },
+    mounted() {
+      this.fetchPosts();
     }
   }
 </script>
@@ -40,28 +95,14 @@
 .app {
   padding: 20px;
 }
-.post {
-  padding: 15px;
-  border: 2px solid darkgreen;
-  margin-top: 15px;
+.app__bnts {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0;
 }
+
 form {
   display: flex;
   flex-direction: column;
-}
-.input {
-  width: 100%;
-  border: 2px solid darkgreen;
-  padding: 10px 15px;
-  margin-top: 15px;
-}
-.btn {
-  margin-top: 15px;
-  align-self: flex-end;
-  padding: 10px 15px;
-  background: none;
-  color: darkgreen;
-  border: 1px solid darkgreen;
-
 }
 </style>
