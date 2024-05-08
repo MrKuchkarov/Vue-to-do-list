@@ -1,8 +1,14 @@
 <template>
   <div class="app">
     <h1>Страница с постами</h1>
-    <my-button @click="showDialog">Создать пользователя</my-button>
-    <my-dialog v-model:show="dialogVisible">
+    <my-button
+        @click="showDialog"
+    >
+      Создать пользователя
+    </my-button>
+    <my-dialog
+        v-model:show="dialogVisible"
+    >
       <post-form @create="createPost"/>
     </my-dialog>
     <post-list :posts="posts" @remove="removePost"/>
@@ -12,11 +18,9 @@
 <script>
 import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
-import MyButton from "@/components/UI/MyButton.vue";
 
   export default {
     components: {
-      MyButton,
       PostForm,
       PostList
     },
@@ -33,7 +37,8 @@ import MyButton from "@/components/UI/MyButton.vue";
     },
     methods: {
       createPost(post) {
-        this.posts.push(post)
+        this.posts.push(post);
+        this.dialogVisible = false;
       },
       removePost(post) {
         this.posts = this.posts.filter(p => p.id !== post.id)
