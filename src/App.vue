@@ -1,6 +1,10 @@
 <template>
   <div class="app">
     <h1>Страница с постами</h1>
+    <my-input
+        v-model="searchQuery"
+        placeholder="Поиск..."
+    />
     <div class="app__bnts"
     >
       <my-button
@@ -23,7 +27,7 @@
       />
     </my-dialog>
     <post-list
-        :posts="posts"
+        :posts="sortedAndSearchedPosts"
         @remove="removePost"
         v-if="!isPostsLoading"
     />
@@ -32,6 +36,19 @@
     >
       Идёт загрузка постов...
     </div>
+    <div class="page__wrapper">
+      <div
+          v-for="pageNumber in totalPages"
+          :key="pageNumber"
+          class="page"
+          :class="{
+            'current-page': page === pageNumber
+          }"
+          @click="changePage(pageNumber)"
+      >
+        {{ pageNumber }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -39,6 +56,7 @@
 import PostForm from "@/components/PostForm.vue";
 import PostList from "@/components/PostList.vue";
 import axios from "axios";
+
 
   export default {
     components: {
@@ -51,9 +69,13 @@ import axios from "axios";
         dialogVisible: false,
         isPostsLoading: false,
         selectedSort: '',
+        searchQuery: '',
+        page: 1,
+        limit: 10,
+        totalPages: 0,
         sortOptions: [
           {value: 'title', name: 'По названию'},
-          {value: 'ищвн', name: 'По содержимому'},
+          {value: 'body', name: 'По содержимому'},
         ]
       }
     },
@@ -68,10 +90,19 @@ import axios from "axios";
       showDialog() {
         this.dialogVisible = true;
       },
+      changePage(pageNumber) {
+        this.page = pageNumber;
+      },
       async fetchPosts() {
         try {
           this.isPostsLoading = true;
-          const response = await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10');
+          const response = await axios.get('https://jsonplaceholder.typicode.com/posts', {
+            params: {
+              _page: this.page,
+              _limit: this.limit
+            }
+          });
+          this.totalPages = Math.ceil(response.headers['x-total-count'] / this.limit)
           this.posts = response.data;
         } catch(e) {
           alert('Ой, ошибка')
@@ -82,6 +113,19 @@ import axios from "axios";
     },
     mounted() {
       this.fetchPosts();
+    },
+    computed: {
+      sortedPosts() {
+        return [...this.posts].sort((postOne, postTwo) => postOne[this.selectedSort]?.localeCompare(postTwo[this.selectedSort]));
+      },
+      sortedAndSearchedPosts() {
+        return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      }
+    },
+    watch: {
+      page() {
+        this.fetchPosts()
+      }
     }
   }
 </script>
@@ -100,9 +144,15 @@ import axios from "axios";
   justify-content: space-between;
   margin: 15px 0;
 }
-
-form {
+.page__wrapper {
   display: flex;
-  flex-direction: column;
+  margin-top: 15px;
+}
+.page {
+  border: 1px solid black;
+  padding: 10px;
+}
+.current-page {
+  border: 2px solid darkgreen;
 }
 </style>
